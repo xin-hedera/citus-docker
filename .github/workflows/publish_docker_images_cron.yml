@@ -1,0 +1,27 @@
+name: Cron job for building and publishing docker images
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+
+  build_and_publish_images:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image_type: [ latest, alpine, postgres_12, nightly ]
+    steps:
+      - name: Checkout docker repository
+        uses: actions/checkout@v2
+
+      - name: Clone tools repository
+        run: git clone https://github.com/citusdata/tools.git --branch tools-transition-update-docker --single-branch tools
+
+      - name: Install package dependencies
+        run: sudo apt install libcurl4-openssl-dev libssl-dev
+
+      - name: Install python dependencies
+        run: python -m pip install -r tools/packaging_automation/requirements.txt
+
