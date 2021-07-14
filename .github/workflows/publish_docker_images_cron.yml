@@ -31,4 +31,4 @@ jobs:
       - name: Build and publish docker images
         run: |
           python -m  tools.packaging_automation.publish_docker  --pipeline_trigger_type "${GITHUB_EVENT_NAME}"\
-          --exec_path "$(pwd)" --image_type ${{ matrix.image_type }}
+           --exec_path "$(pwd)" --image_type ${{ matrix.image_type }}
