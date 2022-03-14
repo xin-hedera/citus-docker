@@ -1,6 +1,6 @@
 # This file is auto generated from it's template,
 # see citusdata/tools/packaging_automation/templates/docker/alpine/alpine.tmpl.dockerfile.
-FROM postgres:14.0-alpine
+FROM postgres:14.2-alpine
 ARG VERSION=10.2.4
 LABEL maintainer="Citus Data https://citusdata.com" \
       org.label-schema.name="Citus" \
@@ -15,6 +15,7 @@ LABEL maintainer="Citus Data https://citusdata.com" \
 RUN apk add --no-cache \
             --virtual builddeps \
         build-base \
+        krb5-dev \
         curl \
         curl-dev \
         openssl-dev \
