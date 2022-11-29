@@ -1,6 +1,7 @@
 # This file is auto generated from it's template,
 # see citusdata/tools/packaging_automation/templates/docker/postgres-14/postgres-14.tmpl.dockerfile.
 FROM postgres:14.5
+ARG PG_CRON_DB='mirror_node'
 ARG VERSION=11.1.4
 LABEL maintainer="Citus Data https://citusdata.com" \
       org.label-schema.name="Citus" \
@@ -13,7 +14,7 @@ LABEL maintainer="Citus Data https://citusdata.com" \
 
 ENV CITUS_VERSION ${VERSION}.citus-1
 
-# install Citus
+# install Citus, pg cron and partman
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates \
@@ -22,11 +23,15 @@ RUN apt-get update \
     && apt-get install -y postgresql-$PG_MAJOR-citus-11.1=$CITUS_VERSION \
                           postgresql-$PG_MAJOR-hll=2.17.citus-1 \
                           postgresql-$PG_MAJOR-topn=2.5.0.citus-1 \
+                          postgresql-$PG_MAJOR-cron \
+                          postgresql-$PG_MAJOR-partman \
     && apt-get purge -y --auto-remove curl \
     && rm -rf /var/lib/apt/lists/*
 
-# add citus to default PostgreSQL config
-RUN echo "shared_preload_libraries='citus'" >> /usr/share/postgresql/postgresql.conf.sample
+# add citus, pg_cron and partman to default PostgreSQL config
+RUN echo "shared_preload_libraries='citus,pg_cron,pg_partman_bgw'" >> /usr/share/postgresql/postgresql.conf.sample
+RUN echo "max_locks_per_transaction = 1024" >> /usr/share/postgresql/postgresql.conf.sample
+RUN echo "cron.database_name = '${PG_CRON_DB}'" >> /usr/share/postgresql/postgresql.conf.sample
 
 # add scripts to run after initdb
 COPY 001-create-citus-extension.sql /docker-entrypoint-initdb.d/
